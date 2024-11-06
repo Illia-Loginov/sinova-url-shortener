@@ -3,7 +3,7 @@ import { HydratedDocument, Model } from 'mongoose';
 import { z } from 'zod';
 import { Counter } from './counter.schema';
 
-@Schema()
+@Schema({ id: false, versionKey: false })
 export class Url {
   @Prop({
     required: true,

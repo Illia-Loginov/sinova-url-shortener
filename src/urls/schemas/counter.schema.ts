@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
-@Schema()
+@Schema({ id: false, versionKey: false })
 export class Counter {
   @Prop({ required: true, unique: true })
   name: string;

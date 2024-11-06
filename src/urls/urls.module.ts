@@ -4,6 +4,7 @@ import { UrlsController } from './urls.controller';
 import { getModelToken, MongooseModule } from '@nestjs/mongoose';
 import { registerHooks, Url } from './schemas/url.schema';
 import { Counter, CounterSchema } from './schemas/counter.schema';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { Counter, CounterSchema } from './schemas/counter.schema';
       },
       { name: Counter.name, useFactory: () => CounterSchema },
     ]),
+    ConfigModule,
   ],
   controllers: [UrlsController],
   providers: [UrlsService],
