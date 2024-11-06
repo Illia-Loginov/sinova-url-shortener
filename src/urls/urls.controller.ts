@@ -39,7 +39,13 @@ export class UrlsController {
   }
 
   @Get('stats/:code')
-  stats(@Param('code', new ZodValidationPipe(codeSchema)) code: CodeDto) {
-    return this.urlsService.stats(code);
+  async stats(@Param('code', new ZodValidationPipe(codeSchema)) code: CodeDto) {
+    const stats = await this.urlsService.getStatsByCode(code);
+
+    if (!stats) {
+      throw new NotFoundException({ message: 'URL not found' });
+    }
+
+    return stats;
   }
 }

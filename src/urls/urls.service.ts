@@ -14,7 +14,7 @@ export class UrlsService {
   private async getCodeByUrl(url: string) {
     const result = await this.urlModel
       .findOne({ url })
-      .select('code')
+      .select(['code', '-_id'])
       .lean()
       .exec();
 
@@ -40,14 +40,18 @@ export class UrlsService {
   async getUrlByCode(code: string) {
     const result = await this.urlModel
       .findOneAndUpdate({ code }, { $inc: { clickCount: 1 } })
-      .select('url')
+      .select(['url', '-_id'])
       .lean()
       .exec();
 
     return result?.url;
   }
 
-  stats(code: string) {
-    return 'stats of ' + code;
+  async getStatsByCode(code: string) {
+    return this.urlModel
+      .findOne({ code })
+      .select(['url', 'code', 'clickCount', '-_id'])
+      .lean()
+      .exec();
   }
 }
