@@ -16,7 +16,7 @@ export class Url {
   })
   url: string;
 
-  @Prop({ unique: true, maxlength: 6, match: /^[a-z0-9]{1,6}$/ })
+  @Prop({ unique: true, minlength: 1, maxlength: 6, match: /^[a-z0-9]{1,6}$/ })
   code: string;
 
   @Prop({ default: 0 })

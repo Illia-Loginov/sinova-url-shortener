@@ -37,8 +37,14 @@ export class UrlsService {
     return this.shortenedUrl(newUrl.code);
   }
 
-  redirect(code: string) {
-    return 'redirect to original url of ' + code;
+  async getUrlByCode(code: string) {
+    const result = await this.urlModel
+      .findOneAndUpdate({ code }, { $inc: { clickCount: 1 } })
+      .select('url')
+      .lean()
+      .exec();
+
+    return result?.url;
   }
 
   stats(code: string) {
