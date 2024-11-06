@@ -33,19 +33,29 @@ export class UrlsService {
   async shortenUrl(url: string) {
     const code = await this.getCodeByUrl(url);
 
-    await this.cacheManager.set(`code:${code}`, url, 20 * 60 * 1000);
+    await this.cacheManager.set(`code:${code}`, url);
 
     return `${this.configService.get<string>('SERVER_URL')}/${code}`;
   }
 
   async getUrlByCode(code: string) {
-    const result = await this.urlModel
+    const cachedUrl = await this.cacheManager.get<string>(`code:${code}`);
+
+    if (cachedUrl) {
+      this.urlModel
+        .updateOne({ code }, { $inc: { clickCount: 1 } })
+        .catch((error) => console.error(error));
+
+      return cachedUrl;
+    }
+
+    const storedMapping = await this.urlModel
       .findOneAndUpdate({ code }, { $inc: { clickCount: 1 } })
       .select(['url', '-_id'])
       .lean()
       .exec();
 
-    return result?.url;
+    return storedMapping?.url;
   }
 
   async getStatsByCode(code: string) {
