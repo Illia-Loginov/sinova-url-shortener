@@ -11,10 +11,30 @@ export class UrlsService {
     private configService: ConfigService,
   ) {}
 
+  private async getCodeByUrl(url: string) {
+    const result = await this.urlModel
+      .findOne({ url })
+      .select('code')
+      .lean()
+      .exec();
+
+    return result?.code;
+  }
+
+  private shortenedUrl(code: string) {
+    return `${this.configService.get<string>('SERVER_URL')}/${code}`;
+  }
+
   async create(url: string) {
+    const oldCode = await this.getCodeByUrl(url);
+
+    if (oldCode) {
+      return this.shortenedUrl(oldCode);
+    }
+
     const newUrl = await this.urlModel.create({ url, clickCount: 0 });
 
-    return `${this.configService.get<string>('SERVER_URL')}/${newUrl.code}`;
+    return this.shortenedUrl(newUrl.code);
   }
 
   redirect(code: string) {
