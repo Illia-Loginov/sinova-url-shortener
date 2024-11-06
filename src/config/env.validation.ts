@@ -1,9 +1,28 @@
-import { z } from 'zod';
+import { formatZodError } from 'src/utils/formatZodError';
+import { z, ZodError } from 'zod';
 
 const envValidationSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535),
   MONGO_URI: z.string().url(),
 });
 
-export const validate = (config: Record<string, unknown>) =>
-  envValidationSchema.parse(config);
+class EnvValidationError extends Error {
+  constructor(error: ZodError) {
+    super();
+
+    this.name = 'EnvValidationError';
+    this.message = JSON.stringify(formatZodError(error), null, 2);
+  }
+}
+
+export const validate = (config: Record<string, unknown>) => {
+  try {
+    return envValidationSchema.parse(config);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new EnvValidationError(error);
+    }
+
+    throw error;
+  }
+};
