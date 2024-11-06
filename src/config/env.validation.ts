@@ -5,6 +5,7 @@ const envValidationSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535),
   SERVER_URL: z.string().url(),
   MONGO_URI: z.string().url(),
+  REDIS_URI: z.string().url(),
 });
 
 class EnvValidationError extends Error {

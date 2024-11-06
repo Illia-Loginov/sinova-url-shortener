@@ -4,7 +4,9 @@ import { UrlsController } from './urls.controller';
 import { getModelToken, MongooseModule } from '@nestjs/mongoose';
 import { registerHooks, Url } from './schemas/url.schema';
 import { Counter, CounterSchema } from './schemas/counter.schema';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CacheModule, CacheStore } from '@nestjs/cache-manager';
+import KeyvRedis from '@keyv/redis';
 
 @Module({
   imports: [
@@ -22,6 +24,17 @@ import { ConfigModule } from '@nestjs/config';
       { name: Counter.name, useFactory: () => CounterSchema },
     ]),
     ConfigModule,
+    CacheModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (
+        configService: ConfigService<Record<string, unknown>, true>,
+      ) => ({
+        store: new KeyvRedis(
+          configService.get<string>('REDIS_URI'),
+        ) as unknown as CacheStore,
+      }),
+    }),
   ],
   controllers: [UrlsController],
   providers: [UrlsService],

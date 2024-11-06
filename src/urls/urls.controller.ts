@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { UrlsService } from './urls.service';
 import { ZodValidationPipe } from 'src/utils/ZodValidationPipe';
-import { CreateUrlDto, createUrlSchema } from './dto/create-url.dto';
+import { ShortenUrlDto, shortenUrlSchema } from './dto/shorten-url.dto';
 import { CodeDto, codeSchema } from './dto/code.dto';
 
 @Controller()
@@ -18,10 +18,10 @@ export class UrlsController {
   constructor(private readonly urlsService: UrlsService) {}
 
   @Post('shorten')
-  async create(
-    @Body(new ZodValidationPipe(createUrlSchema)) { url }: CreateUrlDto,
+  async shortenUrl(
+    @Body(new ZodValidationPipe(shortenUrlSchema)) { url }: ShortenUrlDto,
   ) {
-    return this.urlsService.create(url);
+    return this.urlsService.shortenUrl(url);
   }
 
   @Get(':code')
