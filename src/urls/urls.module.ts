@@ -7,6 +7,8 @@ import { Counter, CounterSchema } from './schemas/counter.schema';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CacheModule, CacheStore } from '@nestjs/cache-manager';
 import KeyvRedis from '@keyv/redis';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -37,6 +39,12 @@ import KeyvRedis from '@keyv/redis';
     }),
   ],
   controllers: [UrlsController],
-  providers: [UrlsService],
+  providers: [
+    UrlsService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class UrlsModule {}
