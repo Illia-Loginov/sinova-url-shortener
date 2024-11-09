@@ -55,7 +55,7 @@ export class UrlsService {
       .lean()
       .exec();
 
-    return storedMapping?.url;
+    return storedMapping?.url || null;
   }
 
   async getStatsByCode(code: string) {

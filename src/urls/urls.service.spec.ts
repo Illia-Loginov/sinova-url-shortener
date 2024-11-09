@@ -154,7 +154,31 @@ describe('UrlsService', () => {
         { $inc: { clickCount: 1 } },
       );
 
-      expect(result).toBeUndefined();
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('getStatsByCode()', () => {
+    it('returns stats from database', async () => {
+      jest.spyOn(model, 'findOne').mockImplementationOnce(function () {
+        this.data = urlMapping;
+
+        return this;
+      });
+
+      const result = await service.getStatsByCode(urlMapping.code);
+
+      expect(model.findOne).toHaveBeenCalledWith({ code: urlMapping.code });
+
+      expect(result).toEqual(urlMapping);
+    });
+
+    it('returns undefined, if no stats found', async () => {
+      const result = await service.getStatsByCode(urlMapping.code);
+
+      expect(model.findOne).toHaveBeenCalledWith({ code: urlMapping.code });
+
+      expect(result).toBeNull();
     });
   });
 });
