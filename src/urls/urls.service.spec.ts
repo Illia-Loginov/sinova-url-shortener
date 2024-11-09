@@ -29,16 +29,17 @@ describe('UrlsService', () => {
             data: null,
             findOne: jest.fn().mockReturnThis(),
             findOneAndUpdate: jest.fn().mockReturnThis(),
-            updateOne: jest.fn().mockReturnThis(),
-            create: jest.fn(),
+            updateOne: jest.fn().mockImplementation(async function () {
+              return this;
+            }),
+            create: jest.fn().mockResolvedValue(urlMapping as any),
             select: jest.fn().mockReturnThis(),
             lean: jest.fn().mockReturnThis(),
-            exec: jest.fn().mockImplementation(function () {
+            exec: jest.fn().mockImplementation(async function () {
               const data = this.data;
-
               this.data = null;
 
-              return Promise.resolve(data);
+              return data;
             }),
           },
         },
@@ -65,8 +66,6 @@ describe('UrlsService', () => {
 
   describe('shortenUrl()', () => {
     it('creates and stores new url-to-code mapping and returns shortened url', async () => {
-      jest.spyOn(model, 'create').mockResolvedValueOnce(urlMapping as any);
-
       const result = await service.shortenUrl(urlMapping.url);
 
       expect(model.findOne).toHaveBeenCalledWith({ url: urlMapping.url });
@@ -86,7 +85,9 @@ describe('UrlsService', () => {
 
     it('returns existing url-to-code mapping, if found', async () => {
       jest.spyOn(model, 'findOne').mockImplementationOnce(function () {
-        this.data = urlMapping;
+        this.data = {
+          code: urlMapping.code,
+        };
 
         return this;
       });
@@ -103,6 +104,57 @@ describe('UrlsService', () => {
       expect(result).toBe(
         `${configService.get<string>('SERVER_URL')}/${urlMapping.code}`,
       );
+    });
+  });
+
+  describe('getUrlByCode()', () => {
+    it('returns url from cache', async () => {
+      jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(urlMapping.url);
+
+      const result = await service.getUrlByCode(urlMapping.code);
+
+      expect(cacheManager.get).toHaveBeenCalledWith(`code:${urlMapping.code}`);
+      expect(model.updateOne).toHaveBeenCalledWith(
+        { code: urlMapping.code },
+        { $inc: { clickCount: 1 } },
+      );
+      expect(model.findOneAndUpdate).not.toHaveBeenCalled();
+
+      expect(result).toBe(urlMapping.url);
+    });
+
+    it('returns url from database', async () => {
+      jest.spyOn(model, 'findOneAndUpdate').mockImplementationOnce(function () {
+        this.data = {
+          url: urlMapping.url,
+        };
+
+        return this;
+      });
+
+      const result = await service.getUrlByCode(urlMapping.code);
+
+      expect(cacheManager.get).toHaveBeenCalledWith(`code:${urlMapping.code}`);
+      expect(model.updateOne).not.toHaveBeenCalled();
+      expect(model.findOneAndUpdate).toHaveBeenCalledWith(
+        { code: urlMapping.code },
+        { $inc: { clickCount: 1 } },
+      );
+
+      expect(result).toBe(urlMapping.url);
+    });
+
+    it('returns undefined, if no url found', async () => {
+      const result = await service.getUrlByCode(urlMapping.code);
+
+      expect(cacheManager.get).toHaveBeenCalledWith(`code:${urlMapping.code}`);
+      expect(model.updateOne).not.toHaveBeenCalled();
+      expect(model.findOneAndUpdate).toHaveBeenCalledWith(
+        { code: urlMapping.code },
+        { $inc: { clickCount: 1 } },
+      );
+
+      expect(result).toBeUndefined();
     });
   });
 });
