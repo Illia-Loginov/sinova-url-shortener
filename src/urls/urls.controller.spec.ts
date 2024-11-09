@@ -8,7 +8,16 @@ describe('UrlsController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UrlsController],
-      providers: [UrlsService],
+      providers: [
+        {
+          provide: UrlsService,
+          useValue: {
+            shortenUrl: jest.fn(),
+            getUrlByCode: jest.fn(),
+            getStatsByCode: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     controller = module.get<UrlsController>(UrlsController);

@@ -9,7 +9,7 @@ import {
   Redirect,
 } from '@nestjs/common';
 import { UrlsService } from './urls.service';
-import { ZodValidationPipe } from 'src/utils/ZodValidationPipe';
+import { ZodValidationPipe } from '../utils/ZodValidationPipe';
 import { ShortenUrlDto, shortenUrlSchema } from './dto/shorten-url.dto';
 import { CodeDto, codeSchema } from './dto/code.dto';
 import {
