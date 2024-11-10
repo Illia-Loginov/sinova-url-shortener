@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { validate } from './config/env.validation';
 import { UrlsModule } from './urls/urls.module';
@@ -35,7 +33,5 @@ import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis'
       }),
     }),
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
